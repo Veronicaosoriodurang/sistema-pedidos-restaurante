@@ -8,5 +8,4 @@ El Story Mapping organiza el producto alrededor de cuatro áreas principales:
 4. **Gestión del menú**
 
 La figura original se conserva como evidencia visual.
-
 ![Story Mapping](imagenes/Story_Mapping_Restaurante.png)
