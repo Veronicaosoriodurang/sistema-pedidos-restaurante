@@ -87,7 +87,7 @@ Las imágenes del entregable están en [`docs/assets`](docs/assets): el Story Ma
 
 ## Equipo de trabajo
 
-| Integrante | Identificación académica |
+| Integrante | Identificación |
 |---|---|
 | Verónica Osorio Durango | 21258235 |
 | Juan David Gonzalez Vasco | 24158446 |
