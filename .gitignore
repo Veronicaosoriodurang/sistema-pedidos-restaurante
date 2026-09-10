@@ -1,0 +1,23 @@
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editores / IDE
+.vscode/
+.idea/
+
+# Archivos temporales
+*.tmp
+*.log
+~$*
+
+# Dependencias / builds futuros
+bin/
+obj/
+node_modules/
+dist/
+build/
+
+# Variables de entorno
+.env
+.env.*
