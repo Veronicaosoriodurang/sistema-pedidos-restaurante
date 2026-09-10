@@ -50,4 +50,4 @@ Gestión de direcciones, datos del usuario e historial de pedidos.
 
 ![Domiciliario](assets/figma-domiciliario.png)
 
-> El documento original menciona un enlace al prototipo interactivo de Figma, pero el texto disponible no contiene la URL real. Puede agregarse aquí cuando el equipo la tenga.
+> Link figma: https://www.figma.com/design/HQ0V1w7lX3dpqzc2LIPwgi/Untitled?node-id=0-1&t=qxSfaKM2h0ZR99G7-1
