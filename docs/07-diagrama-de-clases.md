@@ -1,6 +1,6 @@
 # 7. Diagrama de clases
 
-El siguiente diagrama representa las principales clases identificadas en el entregable y sus relaciones. Se presenta directamente en formato Mermaid para que pueda visualizarse correctamente dentro de GitHub sin depender de una imagen externa.
+El siguiente diagrama representa las principales clases identificadas y sus relaciones. Se presenta directamente en formato Mermaid
 
 ```mermaid
 classDiagram
@@ -28,7 +28,7 @@ classDiagram
     }
 
     class Domiciliario {
-        +string disponibilidad
+        +bool disponibilidad
         +verPedidosAsignados()
         +actualizarEstadoEntrega()
     }
@@ -38,9 +38,18 @@ classDiagram
         +date fecha
         +double total
         +string estadoPedido
-        +calcularTotal()
+        +agregarProducto()
+        +modificarCantidad()
         +cancelarPedido()
         +confirmarPedido()
+    }
+
+    class DetallePedido {
+        +int idDetalle
+        +int cantidad
+        +double precioUnitario
+        +double subtotal
+        +calcularSubtotal()
     }
 
     class Entrega {
@@ -53,6 +62,7 @@ classDiagram
         +int idDireccion
         +string direccion
         +string municipio
+        +bool principal
         +actualizarDireccion()
     }
 
@@ -79,20 +89,21 @@ classDiagram
     Usuario <|-- Domiciliario
 
     Cliente "1" --> "0..*" Pedido : realiza
+    Cliente "1" --> "0..*" Direccion : registra
+    Pedido "1" --> "1..*" DetallePedido : contiene
+    DetallePedido "0..*" --> "1" Producto : referencia
     Pedido "1" --> "0..1" Entrega : genera
     Domiciliario "1" --> "0..*" Entrega : atiende
     Entrega "0..*" --> "1" Direccion : se entrega en
-    Pedido "1" --> "1..*" Producto : contiene
     Categoria "1" --> "0..*" Producto : clasifica
 ```
 
 ## Interpretación general
 
 - `Usuario` funciona como clase general de la cual se especializan `Cliente`, `Administrador` y `Domiciliario`.
-- El `Cliente` realiza pedidos.
-- Un `Pedido` contiene uno o varios productos y puede generar una entrega.
+- El `Cliente` realiza pedidos y registra sus propias direcciones de entrega.
+- Un `Pedido` está compuesto por uno o varios `DetallePedido`, cada uno con la cantidad y el subtotal de un producto específico. Esta clase intermedia evita relacionar `Pedido` y `Producto` directamente, ya que un mismo producto puede aparecer en muchos pedidos distintos.
+- Un `Pedido` puede generar una `Entrega`.
 - El `Domiciliario` gestiona las entregas que le son asignadas.
-- La `Entrega` se relaciona con una dirección de destino.
+- La `Entrega` se relaciona con una dirección de destino, y esa dirección puede marcarse como principal.
 - Los `Productos` se organizan por categorías.
-
-> Este diagrama corresponde a la estructura conceptual presentada en el Entregable 1. La versión en Mermaid permite visualizarlo directamente en GitHub de forma más estable.
