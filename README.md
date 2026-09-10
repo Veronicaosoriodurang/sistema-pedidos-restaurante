@@ -125,9 +125,3 @@ sistema-pedidos-restaurante/
         ├── figma-administrador.png
         └── figma-domiciliario.png
 ```
-
-## Estado del proyecto
-
-**Fase actual:** análisis y diseño.
-
-Por ahora el repo tiene la documentación del primer entregable: modelo verbal, requisitos, reglas de negocio, matriz de trazabilidad, story mapping, historias de usuario, diagrama de clases y prototipo de alta fidelidad. Más adelante entraría el código, las pruebas y los manuales de usuario.
