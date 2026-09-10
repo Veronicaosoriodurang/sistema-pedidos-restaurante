@@ -1,6 +1,6 @@
 # Sistema de Pedidos para Restaurante
 
-Proyecto académico de **Diseño de Sistemas de Información** desarrollado para centralizar y digitalizar el proceso de pedidos de un restaurante, desde la consulta del menú hasta la entrega del pedido.
+Proyecto académico de la asignatura Diseño de Sistema de Información. La idea es digitalizar el proceso de pedidos de un restaurante: desde que el cliente ve el menú hasta que el pedido le llega a la puerta.
 
 ## Tabla de contenido
 
@@ -16,66 +16,57 @@ Proyecto académico de **Diseño de Sistemas de Información** desarrollado para
 
 ## Descripción general
 
-El proyecto plantea el diseño de un sistema de pedidos para restaurante que permita centralizar la gestión de clientes, productos, pedidos y entregas.
-
-Actualmente, muchos restaurantes gestionan sus pedidos mediante llamadas, mensajes de WhatsApp o notas físicas, lo que puede generar errores en el registro de productos, cantidades, direcciones y estados de entrega. La solución propuesta busca organizar este proceso mediante una plataforma con funciones específicas para clientes, administradores y domiciliarios.
+Hoy en día muchos restaurantes siguen manejando sus pedidos por teléfono, WhatsApp o notas de papel. Funciona, pero es fácil que se pierda un pedido, se anote mal una dirección o el cliente se quede sin saber en qué va su comida. Este proyecto busca resolver eso con una plataforma centralizada, pensada para tres tipos de usuario: cliente, administrador y domiciliario.
 
 ## Objetivo
 
-Diseñar una solución que permita a los clientes consultar el menú, gestionar pedidos, registrar direcciones y realizar seguimiento del estado de la entrega; al administrador gestionar el menú y asignar domiciliarios; y al domiciliario consultar y actualizar las entregas asignadas.
+Que el cliente pueda ver el menú, armar su pedido, guardar sus direcciones y hacer seguimiento a la entrega sin depender de una llamada. Que el administrador maneje el menú y reparta los pedidos entre los domiciliarios. Y que el domiciliario tenga claro qué le toca entregar y a quién.
 
 ## Roles del sistema
 
 ### Cliente
 
-El cliente puede:
-
 - Registrarse e iniciar sesión.
 - Consultar el menú.
 - Agregar y modificar productos en un pedido.
-- Consultar el resumen del pedido.
+- Ver el resumen del pedido antes de confirmar.
 - Cancelar pedidos cuando corresponda.
 - Registrar direcciones de entrega.
-- Consultar el estado del pedido.
-- Consultar el estado de la entrega.
+- Consultar el estado del pedido y de la entrega.
 - Consultar el historial de pedidos.
 - Actualizar sus datos personales.
 - Recuperar su contraseña.
 
 ### Administrador
 
-El administrador puede:
-
 - Agregar productos al menú.
 - Modificar precios.
 - Cambiar la disponibilidad de los productos.
 - Eliminar productos sin afectar los pedidos históricos.
-- Consultar pedidos recibidos.
+- Consultar los pedidos recibidos.
 - Asignar domiciliarios a los pedidos.
 
 ### Domiciliario
 
-El domiciliario puede:
-
 - Consultar los pedidos que tiene asignados.
-- Consultar la información necesaria del pedido.
-- Consultar los datos básicos del cliente.
+- Ver la información necesaria del pedido.
+- Ver los datos básicos del cliente.
 - Actualizar el estado de la entrega.
-- Consultar su información de perfil.
+- Consultar su perfil.
 
 ## Alcance funcional
 
-El sistema contempla los siguientes módulos principales:
+Los módulos principales del sistema son:
 
-- Gestión de pedidos.
-- Gestión de clientes.
-- Gestión de entregas.
-- Gestión del menú.
-- Gestión de direcciones.
-- Historial de pedidos.
-- Administración de productos.
-- Asignación de domiciliarios.
-- Seguimiento del pedido y de la entrega.
+- Gestión de pedidos
+- Gestión de clientes
+- Gestión de entregas
+- Gestión del menú
+- Gestión de direcciones
+- Historial de pedidos
+- Administración de productos
+- Asignación de domiciliarios
+- Seguimiento del pedido y de la entrega
 
 ## Documentación del proyecto
 
@@ -87,21 +78,12 @@ El sistema contempla los siguientes módulos principales:
 | [04 - Matriz de trazabilidad](docs/04-trazabilidad.md) | Relación entre requisitos de usuario, requisitos funcionales, requisitos no funcionales y reglas de negocio. |
 | [05 - Story Mapping](docs/05-story-mapping.md) | Organización funcional del producto por actividades y épicas. |
 | [06 - Historias de usuario](docs/06-historias-de-usuario.md) | Historias de usuario y criterios de aceptación. |
-| [07 - Diagrama de clases](docs/07-diagrama-de-clases.md) | Representación conceptual de las principales clases del sistema. |
-| [08 - Prototipo Figma](docs/08-prototipo-figma.md) | Descripción de las pantallas de alta fidelidad para cliente, administrador y domiciliario. |
-| [Documento original](docs/entregable-1-original.pdf) | Entregable académico completo utilizado como fuente del repositorio. |
+| [07 - Diagrama de clases](docs/07-diagrama-de-clases.md) | Diagrama de clases en Mermaid, se ve directo en GitHub. |
+| [08 - Prototipo Figma](docs/08-prototipo-figma.md) | Pantallas de alta fidelidad para cliente, administrador y domiciliario. |
 
 ## Evidencias visuales
 
-Las principales figuras del entregable se encuentran en la carpeta [`docs/assets`](docs/assets).
-
-Incluyen:
-
-- Story Mapping.
-- Diagrama de clases.
-- Pantallas del prototipo Figma para cliente.
-- Pantallas del prototipo Figma para administrador.
-- Pantallas del prototipo Figma para domiciliario.
+Las imágenes del entregable están en [`docs/assets`](docs/assets): el Story Mapping y las capturas del prototipo en Figma para cada rol (cliente, administrador y domiciliario). El diagrama de clases no está como imagen porque quedó embebido en Mermaid dentro de su propio documento.
 
 ## Equipo de trabajo
 
@@ -112,10 +94,10 @@ Incluyen:
 | Jhonatan Moreno Palacios | 23158374 |
 | Andrea Vargas Loaiza | 24158960 |
 
-**Docente:** Alexandra Guerrero Bocanegra  
-**Asignatura:** Diseño de Sistema de Información  
-**Institución:** Instituto Tecnológico Metropolitano - ITM  
-**Ciudad:** Medellín, Colombia  
+**Docente:** Alexandra Guerrero Bocanegra
+**Asignatura:** Diseño de Sistema de Información
+**Institución:** Instituto Tecnológico Metropolitano - ITM
+**Ciudad:** Medellín, Colombia
 **Año:** 2026
 
 ## Estructura del repositorio
@@ -134,11 +116,9 @@ sistema-pedidos-restaurante/
     ├── 06-historias-de-usuario.md
     ├── 07-diagrama-de-clases.md
     ├── 08-prototipo-figma.md
-    ├── entregable-1-original.pdf
     └── assets/
         ├── README.md
-        ├── story-mapping.png
-        ├── diagrama-clases.png
+        ├── Story_Mapping_Restaurante.png
         ├── figma-cliente-1.png
         ├── figma-cliente-2.png
         ├── figma-cliente-3.png
@@ -150,6 +130,4 @@ sistema-pedidos-restaurante/
 
 **Fase actual:** análisis y diseño.
 
-El repositorio contiene la documentación correspondiente al primer entregable del proyecto: modelo verbal, requisitos, reglas de negocio, matriz de trazabilidad, Story Mapping, historias de usuario, diagrama de clases y prototipo de alta fidelidad.
-
-En una fase posterior podrán incorporarse el código fuente, las pruebas, la documentación técnica de implementación y los manuales de usuario.
+Por ahora el repo tiene la documentación del primer entregable: modelo verbal, requisitos, reglas de negocio, matriz de trazabilidad, story mapping, historias de usuario, diagrama de clases y prototipo de alta fidelidad. Más adelante entraría el código, las pruebas y los manuales de usuario.
