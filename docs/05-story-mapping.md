@@ -9,6 +9,4 @@ El Story Mapping organiza el producto alrededor de cuatro áreas principales:
 
 La figura original se conserva como evidencia visual.
 
-![Story Mapping](assets/story-mapping.png)
-
-> Fuente: elaboración propia incluida en el entregable académico.
+![Story Mapping](imagenes/Story_Mapping_Restaurante.png)
