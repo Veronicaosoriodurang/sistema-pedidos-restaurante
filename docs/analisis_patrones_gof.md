@@ -1,0 +1,500 @@
+# Documento de Análisis y Selección de Patrones GoF
+
+## Sistema de Pedidos para Restaurante — Sabor Express
+
+---
+
+## 1. Datos generales del proyecto
+
+| Campo | Detalle |
+|---|---|
+| **Nombre del proyecto** | Sistema de Pedidos para Restaurante "Sabor Express" |
+| **Equipo de trabajo** | Verónica Osorio Durango, Juan David Gonzalez Vasco, Jhonatan Moreno Palacios, Andrea Vargas Loaiza |
+| **Asignatura** | Diseño de Sistemas de Información - Grupo 7 |
+| **Docente** | Alexandra Guerrero Bocanegra |
+| **Fecha** | Octubre de 2026 |
+
+---
+
+## 2. Descripción general del proyecto
+
+**Problema que resuelve el proyecto:** Muchos restaurantes gestionan sus pedidos manualmente o mediante canales dispersos (llamadas, WhatsApp, notas en papel). Esto causa errores en cantidades y direcciones, falta de visibilidad en tiempo real del estado del pedido, asignación informal de domiciliarios y ausencia de un histórico digital.
+
+**Objetivo general del sistema:** Centralizar la gestión de pedidos, menú y entregas a través de una plataforma digital que reduzca errores operativos, mejore la coordinación entre administrador, domiciliario y cliente, y brinde seguimiento en tiempo real.
+
+**Descripción del producto propuesto:** Sistema web/móvil compuesto por un frontend para tres actores (Cliente, Administrador, Domiciliario), una API Backend con reglas de negocio y una base de datos relacional para la persistencia del catálogo y los pedidos.
+
+---
+
+## 3. Alcance del MVP
+
+### 3.1 Funcionalidades incluidas en el MVP
+
+| ID | Funcionalidad del MVP | Prioridad | Justificación |
+|---|---|---|---|
+| F1 | Autenticación y gestión de sesiones (Cliente, Admin, Domiciliario) | Alta | Garantiza el acceso seguro según el rol (HU-2.1, HU-2.2). |
+| F2 | Consulta de menú y gestión de disponibilidad de productos | Alta | Permite al cliente ver la oferta vigente y al admin marcar agotados (HU-4.1, HU-4.4). |
+| F3 | Creación, ajuste y confirmación del pedido | Alta | Recorrido central del cliente para armar su pedido y calcular el total (HU-1.1, HU-1.2, HU-1.5). |
+| F4 | Asignación y gestión de entregas | Alta | Coordina la asignación por el admin y la actualización de estados por el domiciliario (HU-3.2, HU-3.4, HU-3.5). |
+| F5 | Seguimiento de estado del pedido en tiempo real | Media | Proporciona visibilidad continua al cliente sobre su compra (HU-1.4). |
+
+### 3.2 Restricciones del MVP
+
+- El proyecto debe implementar **5 patrones GoF no repetidos**.
+- Cada patrón responde a una necesidad real del sistema basada en las historias de usuario del Release 1.
+- La selección evita la sobreingeniería y se ajusta a la arquitectura planteada.
+
+### 3.3 Funcionalidades fuera del MVP
+
+- Cancelación de pedidos e historial avanzado de pedidos (HU-1.3, HU-2.4 - Release 2 y 3).
+- Pasarela de pagos en línea y promociones complejas.
+- Seguimiento por mapa GPS en tiempo real e itinerarios optimizados de entrega.
+- Carga masiva de productos e inventarios automatizados.
+
+---
+
+## 4. Matriz global de análisis de patrones del proyecto
+
+| Necesidad de diseño detectada | Módulo o funcionalidad afectada | Tipo de problema | Patrón candidato | ¿Aporta valor al MVP? | ¿Se solapa con otro patrón? |
+|---|---|---|---|---|---|
+| Instanciación heterogénea de usuarios según su rol tras el login | Gestión de Clientes / Autenticación | Creacional | Factory Method | Sí | No |
+| Construcción paso a paso de un pedido con múltiples ítems y dirección | Gestión de Pedidos | Creacional | Builder | Sí | No |
+| Cambio de comportamiento en el pedido según su fase (Pendiente, En camino, etc.) | Gestión de Pedidos y Entregas | Comportamiento | State | Sí | No |
+| Notificación de cambios de estado del pedido a la interfaz del cliente | Gestión de Entregas / Seguimiento | Comportamiento | Observer | Sí | No |
+| Variaciones en el cálculo de costo de envío/descuentos del pedido | Gestión de Pedidos | Comportamiento | Strategy | Sí | No |
+
+---
+
+## 5. Fichas de análisis de los patrones seleccionados
+
+---
+
+### 5.1 Ficha de Análisis — Patrón 1: Factory Method
+
+#### 5.1.1 Identificación general
+
+- **Nombre del patrón:** Factory Method
+- **Categoría:** [X] Creacional  [ ] Estructural  [ ] De comportamiento
+- **Módulo, componente o funcionalidad donde se aplicará:** Módulo de Autenticación y Usuarios (Controlador de Clientes/Usuarios).
+
+#### 5.1.2 Problema de diseño que se quiere resolver
+
+Al autenticar un usuario en la plataforma, el sistema debe instanciar un tipo de usuario específico (Cliente, Administrador o Domiciliario). Si el servicio de autenticación crea estas clases directamente usando sus constructores concretos, se genera un alto acoplamiento y se vulnera la extensibilidad si en el futuro se agregan nuevos roles (ej. Cajero).
+
+#### 5.1.3 Evidencias del problema en el proyecto
+
+- [ ] Alto acoplamiento
+- [X] Complejidad en la creación de objetos
+- [ ] Necesidad de ampliar funcionalidad sin modificar la clase base
+
+**Explicación contextualizada:** La clase abstracta `Usuario` se extiende en tres roles con atributos y métodos diferentes (Cliente maneja teléfono/dirección, Domiciliario maneja disponibilidad). La API Backend debe retornar el tipo correcto de usuario sin acoplar el login a las clases concretas.
+
+#### 5.1.4 Relación con el MVP
+
+- **¿Por qué este problema sí debe resolverse en el MVP?:** La autenticación es el punto de entrada de los tres usuarios definidos en el MVP (HU-2.1, HU-2.2).
+- **¿Qué riesgo habría si no se aplica?:** Código condicional extenso (switch/case por tipo de rol) disperso en el backend, dificultando el mantenimiento.
+- **¿Es razonable para el MVP?:** [X] Sí  [ ] No.
+- **Justificación:** Se implementa con una interfaz de fábrica limpia y pocas clases asociadas al modelo C4 existente.
+
+#### 5.1.5 Análisis de adecuación del patrón
+
+- **¿Qué parte del sistema cambia?:** La creación de instancias de usuario según las credenciales y el rol.
+- **¿Qué se desea desacoplar?:** El controlador de autenticación respecto a los constructores concretos de Cliente, Administrador y Domiciliario.
+- **Ventaja concreta:** Permite agregar nuevos tipos de usuario sin modificar la lógica de inicio de sesión.
+- **Principio que ayuda a cumplir:** [X] Abierto/Cerrado (OCP)  [ ] Responsabilidad Única  [ ] Inversión de Dependencias
+- **Justificación técnica:** Abre el sistema a la extensión de nuevos roles pero cierra el código de login a modificaciones.
+
+#### 5.1.6 Alternativas consideradas
+
+| Patrón alternativo | ¿Por qué podría confundirse? | ¿Por qué no es el mejor en este caso? |
+|---|---|---|
+| Abstract Factory | Ambos crean objetos derivados de familias. | Agrega complejidad innecesaria (múltiples familias de objetos) cuando solo requerimos instanciar una jerarquía simple de `Usuario`. |
+| Prototype | Se usa para clonar objetos existentes. | No se requiere clonar usuarios, sino instanciarlos desde la base de datos o login. |
+
+#### 5.1.7 No repetición ni solapamiento
+
+- **¿Ya fue usado en otra parte?:** [ ] Sí  [X] No
+- **¿Se solapa con otro patrón?:** [ ] Sí  [X] No
+
+#### 5.1.8 Aplicación concreta al diseño
+
+| Rol del patrón | Clase/componente del proyecto |
+|---|---|
+| Product (Interfaz/Clase Abstracta) | `Usuario` |
+| ConcreteProducts | `Cliente`, `Administrador`, `Domiciliario` |
+| Creator | `UsuarioFactory` |
+| ConcreteCreators | `ClienteFactory`, `AdminFactory`, `DomiciliarioFactory` |
+
+```typescript
+// Pseudocódigo
+abstract class UsuarioFactory {
+  abstract crearUsuario(datos: any): Usuario;
+}
+
+class ClienteFactory extends UsuarioFactory {
+  crearUsuario(datos: any): Usuario {
+    return new Cliente(datos.id, datos.nombre, datos.correo, datos.telefono);
+  }
+}
+```
+
+#### 5.1.9 Conclusión de decisión
+
+- **Decisión final:** [X] Se aprueba  [ ] Se descarta
+- **Justificación:** Resuelve de manera óptima la instanciación de los tres roles definidos en la arquitectura C4 y el modelo de dominio.
+
+---
+
+### 5.2 Ficha de Análisis — Patrón 2: Builder
+
+#### 5.2.1 Identificación general
+
+- **Nombre del patrón:** Builder
+- **Categoría:** [X] Creacional  [ ] Estructural  [ ] De comportamiento
+- **Módulo, componente o funcionalidad donde se aplicará:** Módulo de Gestión de Pedidos (Controlador de Pedidos).
+
+#### 5.2.2 Problema de diseño que se quiere resolver
+
+Un `Pedido` es un objeto complejo que se construye paso a paso en el cliente (agregar productos, modificar cantidades, asociar dirección de entrega, calcular subtotales y total) antes de ser confirmado (HU-1.1, HU-1.2, HU-1.5, HU-3.1). Usar un constructor gigante dificulta la legibilidad y la creación progresiva.
+
+#### 5.2.3 Evidencias del problema en el proyecto
+
+- [ ] Alto acoplamiento
+- [X] Complejidad en la creación de objetos
+- [ ] Necesidad de desacoplar emisor y receptor
+
+**Explicación contextualizada:** Un pedido incluye atributos del cliente, una lista dinámica de `DetallePedido`, una `Dirección` asignada y totales calculados. Su armado ocurre por etapas a lo largo de la navegación del usuario.
+
+#### 5.2.4 Relación con el MVP
+
+- **¿Por qué este problema sí debe resolverse en el MVP?:** El flujo de armado y resumen del pedido antes de confirmar es el corazón operativo del sistema (HU-1.5).
+- **¿Qué riesgo habría si no se aplica?:** Constructores inconsistentes o mutación desordenada de la entidad `Pedido` en memoria.
+- **¿Es razonable para el MVP?:** [X] Sí  [ ] No.
+- **Justificación:** Facilita la implementación del carrito de compras (`CartService` en Angular) sin añadir complejidad excesiva.
+
+#### 5.2.5 Análisis de adecuación del patrón
+
+- **¿Qué parte del sistema cambia?:** La estructura interna del pedido mientras el usuario agrega o retira ítems.
+- **¿Qué se desea desacoplar?:** El proceso de construcción del objeto `Pedido` de su representación final guardada.
+- **Ventaja concreta:** Permite construir pedidos paso a paso de forma fluida y validar que el objeto esté completo antes de enviarlo al backend.
+- **Principio que ayuda a cumplir:** [X] Responsabilidad Única (SRP)  [ ] Abierto/Cerrado
+- **Justificación técnica:** Separa la lógica de ensamblado del pedido de la lógica de negocio del propio objeto `Pedido`.
+
+#### 5.2.6 Alternativas consideradas
+
+| Patrón alternativo | ¿Por qué podría confundirse? | ¿Por qué no es el mejor en este caso? |
+|---|---|---|
+| Factory Method | Ambos son patrones creacionales. | Factory crea el objeto de un solo golpe; Builder lo construye por pasos interactivos. |
+| Prototype | Podría usarse para copiar un pedido anterior. | En el MVP no estamos clonando pedidos históricos, sino armando un pedido nuevo paso a paso. |
+
+#### 5.2.7 No repetición ni solapamiento
+
+- **¿Ya fue usado en otra parte?:** [ ] Sí  [X] No
+- **¿Se solapa con otro patrón?:** [ ] Sí  [X] No
+
+#### 5.2.8 Aplicación concreta al diseño
+
+| Rol del patrón | Clase/componente del proyecto |
+|---|---|
+| Builder | `PedidoBuilder` |
+| Product | `Pedido` |
+| Director | `CarritoService` (Angular Frontend) |
+
+```typescript
+// Pseudocódigo
+class PedidoBuilder {
+  private pedido: Pedido = new Pedido();
+
+  agregarProducto(producto: Producto, cantidad: number): PedidoBuilder {
+    this.pedido.detalles.push(new DetallePedido(producto, cantidad));
+    return this;
+  }
+  setDireccion(direccion: Direccion): PedidoBuilder {
+    this.pedido.direccion = direccion;
+    return this;
+  }
+  build(): Pedido {
+    this.pedido.calcularTotal();
+    return this.pedido;
+  }
+}
+```
+
+#### 5.2.9 Conclusión de decisión
+
+- **Decisión final:** [X] Se aprueba  [ ] Se descarta
+- **Justificación:** Encaja con la experiencia de usuario diseñada en los prototipos Figma para armar el pedido antes de la confirmación (HU-1.5).
+
+---
+
+### 5.3 Ficha de Análisis — Patrón 3: State (Estado)
+
+#### 5.3.1 Identificación general
+
+- **Nombre del patrón:** State
+- **Categoría:** [ ] Creacional  [ ] Estructural  [X] De comportamiento
+- **Módulo, componente o funcionalidad donde se aplicará:** Módulo de Gestión de Pedidos y Entregas (Controlador de Pedidos/Entregas).
+
+#### 5.3.2 Problema de diseño que se quiere resolver
+
+El pedido pasa por múltiples estados: Pendiente, En preparación, En camino, Entregado, Cancelado. Las reglas de negocio restringen las acciones según el estado actual (ej. RN-01: un pedido solo se cancela si está Pendiente; un domiciliario solo actualiza a Entregado si está En camino). Manejar esto con condicionales `if/else` vuelve el código frágil.
+
+#### 5.3.3 Evidencias del problema en el proyecto
+
+- [ ] Alto acoplamiento
+- [X] Cambio frecuente de comportamiento
+- [ ] Multiplicidad de algoritmos
+
+**Explicación contextualizada:** Las transiciones de estado alteran los permisos y las opciones disponibles tanto para el cliente como para el administrador y el domiciliario.
+
+#### 5.3.4 Relación con el MVP
+
+- **¿Por qué este problema sí debe resolverse en el MVP?:** El ciclo de vida del pedido es la columna vertebral de la solución (HU-1.4, HU-3.4, RN-01).
+- **¿Qué riesgo habría si no se aplica?:** Permitir transiciones inválidas (ej. cancelar un pedido ya entregado) o llenar los controladores con bloques de validación repetitivos.
+- **¿Es razonable para el MVP?:** [X] Sí  [ ] No.
+- **Justificación:** Define una estructura clara de clases para los estados principales del MVP.
+
+#### 5.3.5 Análisis de adecuación del patrón
+
+- **¿Qué parte del sistema cambia?:** El comportamiento y los permisos del pedido a medida que avanza su procesamiento.
+- **¿Qué se desea desacoplar?:** La lógica de las reglas de estado respecto a la clase `Pedido` y los controladores.
+- **Ventaja concreta:** Cada estado se encapsula en su propia clase, haciendo imposible ejecutar transiciones no permitidas por la regla de negocio RN-01.
+- **Principio que ayuda a cumplir:** [X] Abierto/Cerrado (OCP)  [X] Responsabilidad Única (SRP)
+- **Justificación técnica:** Cada estado maneja su propia lógica y se pueden agregar nuevos estados sin modificar los existentes.
+
+#### 5.3.6 Alternativas consideradas
+
+| Patrón alternativo | ¿Por qué podría confundirse? | ¿Por qué no es el mejor en este caso? |
+|---|---|---|
+| Strategy | Ambos usan clases intercambiables. | Strategy cambia algoritmos de cálculo; State cambia comportamiento según el estado interno del objeto. |
+| Command | Se usa para encapsular peticiones. | No maneja el ciclo de vida o transiciones de estados de una entidad. |
+
+#### 5.3.7 No repetición ni solapamiento
+
+- **¿Ya fue usado en otra parte?:** [ ] Sí  [X] No
+- **¿Se solapa con otro patrón?:** [ ] Sí  [X] No
+
+#### 5.3.8 Aplicación concreta al diseño
+
+| Rol del patrón | Clase/componente del proyecto |
+|---|---|
+| Context | `Pedido` / `Entrega` |
+| State (Interfaz) | `EstadoPedidoState` |
+| ConcreteStates | `PendienteState`, `EnPreparacionState`, `EnCaminoState`, `EntregadoState` |
+
+```typescript
+// Pseudocódigo
+interface EstadoPedidoState {
+  cancelar(pedido: Pedido): void;
+  avanzar(pedido: Pedido): void;
+}
+
+class PendienteState implements EstadoPedidoState {
+  cancelar(pedido: Pedido) {
+    pedido.setEstado(new CanceladoState());
+  }
+  avanzar(pedido: Pedido) {
+    pedido.setEstado(new EnPreparacionState());
+  }
+}
+```
+
+#### 5.3.9 Conclusión de decisión
+
+- **Decisión final:** [X] Se aprueba  [ ] Se descarta
+- **Justificación:** Garantiza el cumplimiento estricto de la regla de negocio RN-01 y la integridad del flujo de entregas (HU-3.4).
+
+---
+
+### 5.4 Ficha de Análisis — Patrón 4: Observer (Observador)
+
+#### 5.4.1 Identificación general
+
+- **Nombre del patrón:** Observer
+- **Categoría:** [ ] Creacional  [ ] Estructural  [X] De comportamiento
+- **Módulo, componente o funcionalidad donde se aplicará:** Módulo de Gestión de Entregas y Seguimiento en Tiempo Real.
+
+#### 5.4.2 Problema de diseño que se quiere resolver
+
+El requisito no funcional RNF-05 exige que los cambios de estado del pedido y de la entrega se reflejen en la interfaz del cliente y del administrador en un tiempo máximo de 5 segundos. El frontend debe enterarse de los cambios ocurridos en el backend sin hacer peticiones infinitas o acoplar la lógica de entrega al refresco de las pantallas.
+
+#### 5.4.3 Evidencias del problema en el proyecto
+
+- [ ] Alto acoplamiento
+- [X] Necesidad de desacoplar emisor y receptor
+- [ ] Cambio frecuente de comportamiento
+
+**Explicación contextualizada:** Cuando el domiciliario actualiza el estado a "En camino" (HU-3.4), la vista de seguimiento del cliente (HU-1.4, HU-3.3) debe enterarse automáticamente.
+
+#### 5.4.4 Relación con el MVP
+
+- **¿Por qué este problema sí debe resolverse en el MVP?:** Cumple directamente con el requisito no funcional de actualización en tiempo real (RNF-05).
+- **¿Qué riesgo habría si no se aplica?:** Que el cliente deba refrescar manualmente la pantalla para ver el avance de su pedido.
+- **¿Es razonable para el MVP?:** [X] Sí  [ ] No.
+- **Justificación:** Angular utiliza RxJS (Observables) nativamente en el frontend y WebSockets/Events en el backend.
+
+#### 5.4.5 Análisis de adecuación del patrón
+
+- **¿Qué parte del sistema cambia?:** El estado del pedido en el servidor.
+- **¿Qué se desea desacoplar?:** El componente que modifica el estado (backend/domiciliario) de los componentes visuales que muestran dicho estado (pantalla del cliente).
+- **Ventaja concreta:** Notificación reactiva inmediata a los clientes suscritos.
+- **Principio que ayuda a cumplir:** [X] Inversión de Dependencias (DIP)  [X] Abierto/Cerrado (OCP)
+- **Justificación técnica:** El sujeto notifica a una abstracción (observador) sin conocer las pantallas concretas que escuchan.
+
+#### 5.4.6 Alternativas consideradas
+
+| Patrón alternativo | ¿Por qué podría confundirse? | ¿Por qué no es el mejor en este caso? |
+|---|---|---|
+| Mediator | Centraliza la comunicación entre objetos. | Mediator coordina interacciones entre muchos colegas; Observer se enfoca en propagar eventos de un sujeto a sus suscriptores. |
+| Polling (Sondeo) | No es un patrón GoF, sino una técnica de consulta HTTP. | Ineficiente, satura el servidor y no garantiza reflejar el cambio dentro de los 5 segundos requeridos (RNF-05). |
+
+#### 5.4.7 No repetición ni solapamiento
+
+- **¿Ya fue usado en otra parte?:** [ ] Sí  [X] No
+- **¿Se solapa con otro patrón?:** [ ] Sí  [X] No
+
+#### 5.4.8 Aplicación concreta al diseño
+
+| Rol del patrón | Clase/componente del proyecto |
+|---|---|
+| Subject (Sujeto) | `PedidoEstadoObservable` / WebSocket Service |
+| Observer (Interfaz) | `PedidoObserver` |
+| ConcreteObservers | `SeguimientoPedidoComponent` (Cliente), `PanelAdminComponent` |
+
+```typescript
+// Pseudocódigo frontend (RxJS)
+class SeguimientoPedidoComponent implements PedidoObserver {
+  ngOnInit() {
+    this.pedidoService.estadoPedido$.subscribe(nuevoEstado => {
+      this.actualizarTimeline(nuevoEstado);
+    });
+  }
+}
+```
+
+#### 5.4.9 Conclusión de decisión
+
+- **Decisión final:** [X] Se aprueba  [ ] Se descarta
+- **Justificación:** Esencial para garantizar el cumplimiento del requisito RNF-05 (actualización en tiempo real < 5s).
+
+---
+
+### 5.5 Ficha de Análisis — Patrón 5: Strategy (Estrategia)
+
+#### 5.5.1 Identificación general
+
+- **Nombre del patrón:** Strategy
+- **Categoría:** [ ] Creacional  [ ] Estructural  [X] De comportamiento
+- **Módulo, componente o funcionalidad donde se aplicará:** Módulo de Gestión de Pedidos (Cálculo de Totales y Costos de Envío).
+
+#### 5.5.2 Problema de diseño que se quiere resolver
+
+El cálculo del total a pagar en un pedido implica la sumatoria de productos más el costo de envío. El costo de envío o la tarifa del pedido puede variar según el tipo de cálculo (ej. Tarifa Fija para el MVP, Envío por Distancia o Tarifa Gratis por monto mínimo). Si se incrustan las fórmulas de cobro directamente en la clase `Pedido`, se pierde flexibilidad para ajustar la estrategia comercial del restaurante.
+
+#### 5.5.3 Evidencias del problema en el proyecto
+
+- [ ] Alto acoplamiento
+- [X] Multiplicidad de algoritmos
+- [ ] Cambio frecuente de comportamiento
+
+**Explicación contextualizada:** El sistema necesita calcular el costo total del pedido (HU-1.5) permitiendo variar el cálculo del costo de envío sin alterar la entidad `Pedido`.
+
+#### 5.5.4 Relación con el MVP
+
+- **¿Por qué este problema sí debe resolverse en el MVP?:** Permite mostrar el desglose de subtotal y costo de envío de forma limpia en el resumen del pedido (HU-1.5).
+- **¿Qué riesgo habría si no se aplica?:** Algoritmos de cálculo rígidos acoplados a la entidad `Pedido`.
+- **¿Es razonable para el MVP?:** [X] Sí  [ ] No.
+- **Justificación:** Requiere únicamente una interfaz simple y la estrategia de tarifa fija para la primera entrega.
+
+#### 5.5.5 Análisis de adecuación del patrón
+
+- **¿Qué parte del sistema cambia?:** El algoritmo para calcular el costo de envío o aplicar promociones sobre el total.
+- **¿Qué se desea desacoplar?:** La clase `Pedido` respecto a la fórmula específica utilizada para calcular los costos de envío.
+- **Ventaja concreta:** Facilita cambiar el algoritmo de cálculo en tiempo de ejecución sin modificar `Pedido`.
+- **Principio que ayuda a cumplir:** [X] Abierto/Cerrado (OCP)  [X] Responsabilidad Única (SRP)
+- **Justificación técnica:** Separa el cálculo tarifario en clases de estrategia independientes.
+
+#### 5.5.6 Alternativas consideradas
+
+| Patrón alternativo | ¿Por qué podría confundirse? | ¿Por qué no es el mejor en este caso? |
+|---|---|---|
+| State | Ambos encapsulan comportamientos en clases separadas. | State cambia según el ciclo de vida del pedido; Strategy cambia la fórmula de cálculo/algoritmo. |
+| Template Method | Define el esqueleto de un algoritmo usando herencia. | Usa herencia rígida en lugar de composición, haciendo menos flexible el intercambio de tarifas en tiempo de ejecución. |
+
+#### 5.5.7 No repetición ni solapamiento
+
+- **¿Ya fue usado en otra parte?:** [ ] Sí  [X] No
+- **¿Se solapa con otro patrón?:** [ ] Sí  [X] No
+
+#### 5.5.8 Aplicación concreta al diseño
+
+| Rol del patrón | Clase/componente del proyecto |
+|---|---|
+| Context | `Pedido` / `CalculadoraPedidoService` |
+| Strategy (Interfaz) | `CalculoEnvioStrategy` |
+| ConcreteStrategies | `EnvioTarifaFijaStrategy`, `EnvioGratisStrategy` |
+
+```typescript
+// Pseudocódigo
+interface CalculoEnvioStrategy {
+  calcularCosto(subtotal: number): number;
+}
+
+class EnvioTarifaFijaStrategy implements CalculoEnvioStrategy {
+  calcularCosto(subtotal: number): number {
+    return 25.00; // Tarifa base fija del MVP
+  }
+}
+```
+
+#### 5.5.9 Conclusión de decisión
+
+- **Decisión final:** [X] Se aprueba  [ ] Se descarta
+- **Justificación:** Mantiene limpio el cálculo de totales en la HU-1.5 y deja preparada la arquitectura para futuras tarifas de envío.
+
+---
+
+## 6. Consolidado final de los patrones seleccionados
+
+| N° | Patrón GoF | Categoría | Módulo/Funcionalidad | Problema que resuelve | Justificación en el MVP | ¿Se repite? |
+|---|---|---|---|---|---|---|
+| 1 | Factory Method | Creacional | Autenticación / Usuarios | Instanciación acoplada de roles | Permite crear Cliente, Admin y Domiciliario tras login sin switch/case rígidos (HU-2.1, HU-2.2). | No |
+| 2 | Builder | Creacional | Gestión de Pedidos | Construcción compleja e interactiva del pedido | Facilita la adición progresiva de productos y dirección antes de confirmar (HU-1.1, HU-1.5). | No |
+| 3 | State | Comportamiento | Ciclo de vida del Pedido | Reglas y transiciones de estados de pedido frágiles | Garantiza el cumplimiento estricto de la regla RN-01 y el flujo de entrega (HU-1.4, HU-3.4). | No |
+| 4 | Observer | Comportamiento | Seguimiento de Entregas | Refresco manual de datos sin tiempo real | Garantiza el cumplimiento de la norma RNF-05 (actualización en tiempo real < 5s) (HU-3.3). | No |
+| 5 | Strategy | Comportamiento | Cálculo de Totales | Fórmulas de envío e impositivas acopladas | Encapsula las reglas de cobro de envío para el resumen de compra (HU-1.5). | No |
+
+---
+
+## 7. Validación global de consistencia
+
+| Criterio | Sí | No | Observación |
+|---|---|---|---|
+| Cada patrón responde a un problema real del sistema | [X] | [ ] | Todos los patrones están directamente vinculados a historias de usuario (HU) y reglas de negocio (RN). |
+| Los 5 patrones son distintos entre sí | [X] | [ ] | Se seleccionaron 2 Creacionales y 3 de Comportamiento sin repetir ningún patrón. |
+| Ningún patrón fue incluido solo para cumplir con el número | [X] | [ ] | Cada patrón aporta un beneficio directo a la arquitectura backend y frontend en Angular/Node. |
+| Todos los patrones caben en el alcance del MVP | [X] | [ ] | Todos se aplican sobre las 13 historias priorizadas en el Release 1 (Must Have). |
+| La selección evita sobreingeniería | [X] | [ ] | Se descartaron patrones pesados como Abstract Factory o Command en favor de soluciones ágiles. |
+| Existe coherencia entre problema, solución y diseño | [X] | [ ] | Mantiene concordancia directa con los diagramas C4 y el modelo de dominio entregados previamente. |
+
+---
+
+## 8. Conclusión general del análisis
+
+Los 5 patrones GoF seleccionados (Factory Method, Builder, State, Observer y Strategy) son plenamente adecuados y coherentes con el alcance del MVP del restaurante Sabor Express.
+
+- **Factory Method** y **Builder** aseguran una capa creacional limpia para la gestión de usuarios y el armado del carrito de compras.
+- **State** protege la integridad del negocio asegurando que los pedidos respeten las reglas de transición (como RN-01).
+- **Observer** satisface la restricción técnica de refresco en tiempo real por debajo de 5 segundos (RNF-05).
+- **Strategy** desacopla la lógica de liquidación y costos de envío en el resumen del pedido (HU-1.5).
+
+Esta combinación minimiza la deuda técnica, respeta los principios SOLID evaluados en la entrega (SRP, OCP, DIP) y evita caer en sobreingeniería dentro del primer corte funcional.
+
+---
+
+## 9. Regla de decisión recomendada
+
+1. Un patrón solo debe incluirse si resuelve un problema real del sistema.
+2. Debe ser implementable dentro del alcance del MVP.
+3. No debe repetir la función de otro patrón ya seleccionado.
+4. Debe mejorar el diseño sin añadir complejidad innecesaria.
